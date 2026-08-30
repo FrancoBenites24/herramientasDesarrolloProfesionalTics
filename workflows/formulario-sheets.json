@@ -1,0 +1,186 @@
+{
+  "name": "Captura de Leads.v2",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Consulta de Propiedad",
+        "formDescription": "Completa el formulario y un asesor te contactará a la brevedad.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nombre completo",
+              "fieldName": "nombre",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "fieldName": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Teléfono / WhatsApp",
+              "fieldName": "telefono"
+            },
+            {
+              "fieldLabel": "Tipo de propiedad de interés",
+              "fieldType": "dropdown",
+              "fieldName": "tipo_propiedad",
+              "fieldOptions": {
+                "values": [
+                  { "option": "Casa" },
+                  { "option": "Departamento" },
+                  { "option": "Terreno" },
+                  { "option": "Local Comercial" }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Presupuesto aproximado (USD)",
+              "fieldType": "number",
+              "fieldName": "presupuesto"
+            },
+            {
+              "fieldLabel": "Mensaje / Comentarios",
+              "fieldType": "textarea",
+              "fieldName": "mensaje"
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "form-trigger",
+      "name": "Formulario Consulta",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [240, 300],
+      "webhookId": "consulta-inmobiliaria"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fecha",
+              "name": "fecha",
+              "value": "={{ $now.toFormat('yyyy-MM-dd HH:mm') }}",
+              "type": "string"
+            },
+            {
+              "id": "nombre",
+              "name": "nombre",
+              "value": "={{ $json.nombre }}",
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "telefono",
+              "name": "telefono",
+              "value": "={{ $json.telefono || 'No indicado' }}",
+              "type": "string"
+            },
+            {
+              "id": "tipo",
+              "name": "tipo_propiedad",
+              "value": "={{ $json.tipo_propiedad }}",
+              "type": "string"
+            },
+            {
+              "id": "presupuesto",
+              "name": "presupuesto",
+              "value": "={{ $json.presupuesto || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "mensaje",
+              "name": "mensaje",
+              "value": "={{ $json.mensaje || 'Sin mensaje' }}",
+              "type": "string"
+            },
+            {
+              "id": "estado",
+              "name": "estado",
+              "value": "Nuevo",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-datos",
+      "name": "Normalizar Datos",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "TU_GOOGLE_SHEET_ID_AQUI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $json.fecha }}",
+            "Nombre": "={{ $json.nombre }}",
+            "Email": "={{ $json.email }}",
+            "Teléfono": "={{ $json.telefono }}",
+            "Tipo Propiedad": "={{ $json.tipo_propiedad }}",
+            "Presupuesto": "={{ $json.presupuesto }}",
+            "Mensaje": "={{ $json.mensaje }}",
+            "Estado": "={{ $json.estado }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "google-sheets",
+      "name": "Guardar en Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [720, 300]
+    }
+  ],
+  "connections": {
+    "Formulario Consulta": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Datos": {
+      "main": [
+        [
+          {
+            "node": "Guardar en Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
