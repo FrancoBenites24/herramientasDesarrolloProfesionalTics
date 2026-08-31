@@ -1,5 +1,4 @@
 {
-  "name": "Captura de Leads",
   "nodes": [
     {
       "parameters": {
@@ -9,42 +8,44 @@
           "values": [
             {
               "fieldLabel": "Nombre completo",
-              "fieldName": "nombre",
               "requiredField": true
             },
             {
               "fieldLabel": "Email",
               "fieldType": "email",
-              "fieldName": "email",
               "requiredField": true
             },
             {
-              "fieldLabel": "Teléfono / WhatsApp",
-              "fieldName": "telefono"
+              "fieldLabel": "Teléfono / WhatsApp"
             },
             {
               "fieldLabel": "Tipo de propiedad de interés",
               "fieldType": "dropdown",
-              "fieldName": "tipo_propiedad",
               "fieldOptions": {
                 "values": [
-                  { "option": "Casa" },
-                  { "option": "Departamento" },
-                  { "option": "Terreno" },
-                  { "option": "Local Comercial" }
+                  {
+                    "option": "Casa"
+                  },
+                  {
+                    "option": "Departamento"
+                  },
+                  {
+                    "option": "Terreno"
+                  },
+                  {
+                    "option": "Local Comercial"
+                  }
                 ]
               },
               "requiredField": true
             },
             {
               "fieldLabel": "Presupuesto aproximado (USD)",
-              "fieldType": "number",
-              "fieldName": "presupuesto"
+              "fieldType": "number"
             },
             {
               "fieldLabel": "Mensaje / Comentarios",
-              "fieldType": "textarea",
-              "fieldName": "mensaje"
+              "fieldType": "textarea"
             }
           ]
         },
@@ -55,7 +56,10 @@
       "name": "Formulario Consulta",
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.2,
-      "position": [240, 300],
+      "position": [
+        240,
+        304
+      ],
       "webhookId": "consulta-inmobiliaria"
     },
     {
@@ -71,37 +75,37 @@
             {
               "id": "nombre",
               "name": "nombre",
-              "value": "={{ $json.nombre }}",
+              "value": "={{ $json['Nombre completo'] }}",
               "type": "string"
             },
             {
               "id": "email",
               "name": "email",
-              "value": "={{ $json.email }}",
+              "value": "={{ $json.Email }}",
               "type": "string"
             },
             {
               "id": "telefono",
               "name": "telefono",
-              "value": "={{ $json.telefono || 'No indicado' }}",
+              "value": "={{ $json['Teléfono / WhatsApp'] }}",
               "type": "string"
             },
             {
               "id": "tipo",
               "name": "tipo_propiedad",
-              "value": "={{ $json.tipo_propiedad }}",
+              "value": "={{ $json['Tipo de propiedad de interés'] }}",
               "type": "string"
             },
             {
               "id": "presupuesto",
               "name": "presupuesto",
-              "value": "={{ $json.presupuesto || 0 }}",
+              "value": "={{ $json['Presupuesto aproximado (USD)'] }}",
               "type": "number"
             },
             {
               "id": "mensaje",
               "name": "mensaje",
-              "value": "={{ $json.mensaje || 'Sin mensaje' }}",
+              "value": "={{ $json['Mensaje / Comentarios'] }}",
               "type": "string"
             },
             {
@@ -118,33 +122,32 @@
       "name": "Normalizar Datos",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [480, 300]
+      "position": [
+        480,
+        304
+      ]
     },
     {
       "parameters": {
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "TU_GOOGLE_SHEET_ID_AQUI",
-          "mode": "id"
+          "mode": "url",
+          "value": "=https://docs.google.com/spreadsheets/d/1b8gDzwCaROlrK3Ev3dOb8OZWObSRaniLHvcxzAQLKgg/edit?gid=0#gid=0",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
         },
         "sheetName": {
           "__rl": true,
-          "value": "Leads",
-          "mode": "name"
+          "value": "https://docs.google.com/spreadsheets/d/1b8gDzwCaROlrK3Ev3dOb8OZWObSRaniLHvcxzAQLKgg/edit?gid=0#gid=0",
+          "mode": "url"
         },
         "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "Fecha": "={{ $json.fecha }}",
-            "Nombre": "={{ $json.nombre }}",
-            "Email": "={{ $json.email }}",
-            "Teléfono": "={{ $json.telefono }}",
-            "Tipo Propiedad": "={{ $json.tipo_propiedad }}",
-            "Presupuesto": "={{ $json.presupuesto }}",
-            "Mensaje": "={{ $json.mensaje }}",
-            "Estado": "={{ $json.estado }}"
-          }
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
         },
         "options": {}
       },
@@ -152,11 +155,20 @@
       "name": "Guardar en Google Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [720, 300]
+      "position": [
+        720,
+        304
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "A5w6dhdDa0nVb0ed",
+          "name": "Google Sheets account 2"
+        }
+      }
     },
     {
       "parameters": {
-        "chatId": "TU_CHAT_ID_AQUI",
+        "chatId": "6240619869",
         "text": "=🏠 *Nuevo Lead Inmobiliario*\n\n📅 Fecha: {{ $json.fecha }}\n👤 Nombre: {{ $json.nombre }}\n📧 Email: {{ $json.email }}\n📱 Teléfono: {{ $json.telefono }}\n🏡 Tipo: {{ $json.tipo_propiedad }}\n💰 Presupuesto: {{ $json.presupuesto }}\n💬 Mensaje: {{ $json.mensaje }}\n\nEstado: Nuevo",
         "additionalFields": {
           "parse_mode": "Markdown"
@@ -166,7 +178,17 @@
       "name": "Notificar por Telegram",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [960, 300]
+      "position": [
+        960,
+        304
+      ],
+      "webhookId": "b4aea3f6-4700-49a3-a6fa-ede35f563979",
+      "credentials": {
+        "telegramApi": {
+          "id": "YsFG3nlcvLJSCLqY",
+          "name": "Telegram account"
+        }
+      }
     }
   ],
   "connections": {
@@ -204,8 +226,9 @@
       ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1"
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8f348977ec8df72131f8260edec7b7c4f156e376722ebca94a68c9e9d9436e71"
   }
 }
