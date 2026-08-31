@@ -82,7 +82,7 @@ command: /bin/sh -c "n8n import:workflow --separate=/workflows ; n8n start"
    ```text
    http://localhost:5678
    ```
-   *(En el primer ingreso, crea tu cuenta de usuario administrador local).*
+   *(Gracias a `N8N_USER_MANAGEMENT_DISABLED=true`, accederás directamente al panel principal sin necesidad de registrar un usuario ni llenar encuestas).*
 
 4. **Verificar los Flujos Precargados:**
    - Dirígete a la pestaña **Workflows** en el menú lateral izquierdo.
