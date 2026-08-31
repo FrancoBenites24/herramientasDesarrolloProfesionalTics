@@ -8,9 +8,9 @@ Proyecto colaborativo desarrollado para la **Tarea Académica I**. Consiste en u
 
 | Integrante | Rol Asignado | Responsabilidad Principal | Rama de Trabajo |
 | :--- | :--- | :--- | :--- |
-| **Franco Benites** | **Integrante 1**: Infraestructura Docker | Creación de `docker-compose.yml`, configuración de `.gitignore`, persistencia con volúmenes y auto-importación. | `feature/franco` |
-| **Joshelyn Ruiz - Grabiel Carnero** | **Integrante 2**: Diseño del Workflow n8n | Construcción del flujo en n8n, modularización en 4 nodos y exportación de archivos JSON progresivos. | `feature/joshelynruiz` `feature/GrabielCarnero` |
-| **Adriel Benites** | **Integrante 3**: Pruebas y Documentación | Elaboración del `README.md`, diseño de datos de prueba, registro de incidencias y matriz de errores. | `feature/adriel` |
+| **Grabiel Carnero** | **Integrante 1**: Infraestructura Docker | Creación de `docker-compose.yml`, configuración de `.gitignore`, persistencia con volúmenes y auto-importación. | `feature/GrabielCarnero` |
+| **Joshelyn Ruiz - Franco Benites** | **Integrante 2**: Diseño del Workflow n8n | Construcción del flujo en n8n, modularización en 4 nodos y exportación de archivos JSON progresivos. | `feature/joshelynruiz` `/feature/franco` |
+| **Adriel Ynfante** | **Integrante 3**: Pruebas y Documentación | Elaboración del `README.md`, diseño de datos de prueba, registro de incidencias y matriz de errores. | `feature/adriel` |
 
 ---
 
