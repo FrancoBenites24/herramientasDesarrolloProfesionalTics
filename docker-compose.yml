@@ -26,7 +26,7 @@ services:
       # Montaje en modo lectura de la carpeta local con los workflows JSON
       - ./workflows:/workflows:ro
     # Precarga automática de todos los flujos antes de iniciar el servidor n8n
-    command: /bin/sh -c "n8n import:workflow --separate=/workflows ; n8n start"
+    # command: /bin/sh -c "n8n import:workflow --separate=/workflows ; n8n start"
 
 volumes:
   n8n_data:
