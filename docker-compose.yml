@@ -1,0 +1,32 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      # Configuración de red y servidor
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - GENERIC_TIMEZONE=America/Lima
+      - TZ=America/Lima
+
+      # Opción 1: Acceso directo sin pantalla de registro ni login (Ideal para desarrollo y sustentación)
+      - N8N_USER_MANAGEMENT_DISABLED=true
+      # Desactivar encuestas de inicio, diagnóstico y preguntas de personalización
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_PERSONALIZATION_ENABLED=false
+      - N8N_VERSION_NOTIFICATIONS_ENABLED=false
+    volumes:
+      # Volumen persistente para guardar credenciales, ejecuciones y datos de SQLite
+      - n8n_data:/home/node/.n8n
+      # Montaje en modo lectura de la carpeta local con los workflows JSON
+      - ./workflows:/workflows:ro
+    # Precarga automática de todos los flujos antes de iniciar el servidor n8n
+    command: /bin/sh -c "n8n import:workflow --separate=/workflows ; n8n start"
+
+volumes:
+  n8n_data:
