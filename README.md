@@ -32,7 +32,7 @@ El flujo implementado automatiza la **captura y gestión de prospectos (leads) i
 │   ├── formulario-inicial.json    # Versión inicial del formulario
 │   ├── formulario-sheets.json     # Versión intermedia con integración a Google Sheets
 │   └── formulario-completo.json   # Versión final (Formulario + Sheets + Telegram)
-├── docker-compose.yml             # Orquestación del servicio n8n y volumen persistente
+├── docker-compose.yml             # Orquestación del servicio n8n, volumen y auto-importación
 ├── .gitignore                     # Exclusión de credenciales y archivos del sistema
 ├── .env.example                   # Plantilla de variables de entorno
 └── README.md                      # Documentación del proyecto y bitácora de errores
@@ -40,17 +40,32 @@ El flujo implementado automatiza la **captura y gestión de prospectos (leads) i
 
 ---
 
-## 🐳 Despliegue con Docker Compose
+## 🐳 Despliegue con Docker Compose (Auto-Importación de Workflows)
 
-El despliegue se realiza exclusivamente mediante **`docker-compose.yml`** utilizando la imagen oficial de n8n y un volumen persistente para garantizar que las credenciales, workflows y ejecuciones se conserven entre reinicios.
+El despliegue se realiza exclusivamente mediante **`docker-compose.yml`** utilizando la imagen oficial de n8n, volumen persistente y un mecanismo de **importación automática** para que los flujos estén disponibles inmediatamente al abrir la plataforma.
+
+### ⚙️ ¿Cómo funciona la Carga Automática?
+En `docker-compose.yml`, se monta el directorio local `./workflows` dentro del contenedor en modo lectura (`/workflows:ro`) y se ejecuta el comando:
+
+```yaml
+command: /bin/sh -c "n8n import:workflow --separate=/workflows ; n8n start"
+```
+
+1. **Lectura de archivos:** n8n procesa todos los archivos `.json` ubicados en `/workflows`.
+2. **Inyección en la Base de Datos:** Inserta los flujos directamente en la base de datos interna SQLite (`/home/node/.n8n`).
+3. **Arranque del Servicio:** Inicia el servidor web de n8n con los flujos ya precargados.
+
+---
 
 ### 📋 Prerrequisitos
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado y en ejecución.
 - [Git](https://git-scm.com/) instalado.
 
+---
+
 ### 🚀 Pasos para levantar el proyecto localmente
 
-1. **Clonar el repositorio:**
+1. **Clonar el repositorio y ubicarse en la carpeta:**
    ```bash
    git clone https://github.com/FrancoBenites24/herramientasDesarrolloProfesionalTics.git
    cd herramientasDesarrolloProfesionalTics
@@ -60,20 +75,19 @@ El despliegue se realiza exclusivamente mediante **`docker-compose.yml`** utiliz
    ```bash
    docker compose up -d
    ```
-   > El parámetro `-d` levanta el contenedor en segundo plano (detached mode).
+   > ℹ️ *El parámetro `-d` ejecuta el contenedor en segundo plano.*
 
 3. **Acceder a n8n:**
    Abre tu navegador web e ingresa a:
    ```text
    http://localhost:5678
    ```
-   *(En el primer ingreso, completa la configuración de la cuenta de usuario administrador).*
+   *(En el primer ingreso, crea tu cuenta de usuario administrador local).*
 
-4. **Importar el Workflow en n8n:**
-   - En el menú principal de n8n, haz clic en **Workflows** > **Add Workflow**.
-   - Haz clic en el menú superior derecho (`...`) y selecciona **Import from File**.
-   - Selecciona el archivo [`workflows/formulario-completo.json`](workflows/formulario-completo.json).
-   - Configura tus credenciales de Google Sheets y Telegram Bot Token para activarlo.
+4. **Verificar los Flujos Precargados:**
+   - Dirígete a la pestaña **Workflows** en el menú lateral izquierdo.
+   - Verás automáticamente listados los flujos del repositorio (ej. **Captura de Leads**).
+   - Abre el flujo y configura las credenciales personales de Google Sheets / Telegram si deseas probar ejecuciones en vivo.
 
 5. **Detener el servicio:**
    ```bash
@@ -91,9 +105,9 @@ volumes:
   - n8n_data:/home/node/.n8n
 ```
 
-### ¿Por qué es importante?
-- **Sin volumen:** Al detener o eliminar el contenedor (`docker compose down`), todas las credenciales, configuraciones y flujos guardados se borrarían al destruirse la capa de escritura del contenedor.
-- **Con volumen `n8n_data`:** Los datos de la base de datos interna SQLite de n8n se guardan en el host gestionado por Docker, permitiendo actualizar o recrear el contenedor sin pérdida de información.
+### ¿Por qué es fundamental?
+- **Sin volumen:** Al detener o recrear el contenedor (`docker compose down`), todas las credenciales creadas, historiales de ejecución y configuraciones se perderían.
+- **Con volumen `n8n_data`:** Toda la información persiste de forma segura en el almacenamiento administrado por Docker en el host, sobreviviendo a reinicios o actualizaciones del contenedor.
 
 ---
 
@@ -111,8 +125,9 @@ Para garantizar la autoría, trazabilidad y buenas prácticas:
 
 | # | Problema Detectado | Causa Raíz | Solución Aplicada |
 | :-: | :--- | :--- | :--- |
-| **1** | Error `Bind for 0.0.0.0:5678 failed: port is already allocated` al ejecutar `docker compose up`. | El puerto `5678` estaba ocupado por otra instancia previa de n8n o un servicio local. | Se identificó el proceso bloqueador con `netstat -ano \| findstr :5678` y se finalizó la tarea anterior, o se puede mapear temporalmente a otro puerto en `docker-compose.yml` (`"5679:5678"`). |
-| **2** | Las credenciales y flujos desaparecían al reiniciar el contenedor. | Inicialmente no se había definido un volumen permanente para el directorio `/home/node/.n8n`. | Se configuró el volumen nombrado `n8n_data:/home/node/.n8n` en la sección `volumes` de `docker-compose.yml`. |
-| **3** | El trigger del formulario no devolvía respuesta personalizada tras enviar los datos. | El nodo `Formulario Consulta` tenía configurada la respuesta inmediata por defecto en lugar de esperar el procesamiento completo. | Se ajustó el parámetro `responseMode: "lastNode"` para que el usuario reciba la confirmación una vez ejecutado el flujo. |
-| **4** | Error de autenticación 401 en el nodo de Telegram. | Token de bot de Telegram mal configurado o no definido en las credenciales del nodo. | Se creó el bot correspondiente mediante `@BotFather`, se obtuvo el API Token y se vinculó en las credenciales del nodo Telegram. |
-| **5** | Archivos temporales o `.env` intentando subirse al repositorio Git. | Falta de exclusión de archivos locales en el control de versiones. | Se creó y configuró un archivo `.gitignore` robusto que omite archivos `.env`, directorios `.n8n/` y archivos temporales del sistema operativo. |
+| **1** | Error `Bind for 0.0.0.0:5678 failed: port is already allocated` al ejecutar `docker compose up`. | El puerto `5678` estaba ocupado por otra instancia previa de n8n o un servicio local. | Se identificó el proceso con `netstat -ano \| findstr :5678` y se detuvo, o se puede mapear a otro puerto en `docker-compose.yml` (`"5679:5678"`). |
+| **2** | Las credenciales y flujos desaparecían al reiniciar el contenedor. | Inicialmente no se había definido un volumen permanente para `/home/node/.n8n`. | Se configuró el volumen nombrado `n8n_data:/home/node/.n8n` en la sección `volumes` de `docker-compose.yml`. |
+| **3** | Necesidad de importar manualmente los flujos JSON cada vez que se iniciaba n8n. | No existía un proceso de precarga automatizada de archivos JSON al iniciar el contenedor. | Se implementó el comando `command: /bin/sh -c "n8n import:workflow --separate=/workflows ; n8n start"` en `docker-compose.yml` junto con el montaje de volumen `./workflows:/workflows:ro`. |
+| **4** | El trigger del formulario no devolvía respuesta personalizada tras enviar los datos. | El nodo `Formulario Consulta` tenía configurada la respuesta inmediata por defecto en lugar de esperar el procesamiento completo. | Se ajustó el parámetro `responseMode: "lastNode"` para que el usuario reciba la confirmación una vez ejecutado el flujo. |
+| **5** | Error de autenticación 401 en el nodo de Telegram. | Token de bot de Telegram mal configurado o no definido en las credenciales del nodo. | Se creó el bot mediante `@BotFather`, se obtuvo el API Token y se vinculó en las credenciales del nodo Telegram. |
+| **6** | Archivos temporales o `.env` intentando subirse al repositorio Git. | Falta de exclusión de archivos locales en el control de versiones. | Se creó y configuró un archivo `.gitignore` robusto que omite archivos `.env`, directorios `.n8n/` y temporales del sistema operativo. |
