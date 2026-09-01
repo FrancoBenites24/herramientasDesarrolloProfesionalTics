@@ -1,6 +1,6 @@
 # Automatización de Captura de Leads Inmobiliarios con n8n, Docker y GitHub Flow
 
-Proyecto colaborativo desarrollado para la **Tarea Académica I**. Consiste en un sistema de automatización para la recepción, procesamiento, almacenamiento y notificación en tiempo real de clientes potenciales (leads) del sector inmobiliario, desplegado sobre contenedores **Docker** y gestionado con la estrategia **GitHub Flow**.
+Sistema de automatización para la recepción, procesamiento, almacenamiento y notificación en tiempo real de clientes potenciales (leads) del sector inmobiliario, desplegado sobre contenedores **Docker** y gestionado con la estrategia **GitHub Flow**.
 
 ---
 
@@ -9,7 +9,7 @@ Proyecto colaborativo desarrollado para la **Tarea Académica I**. Consiste en u
 | Integrante | Rol Asignado | Responsabilidad Principal | Rama de Trabajo |
 | :--- | :--- | :--- | :--- |
 | **Grabiel Carnero** | **Integrante 1**: Infraestructura Docker | Creación de `docker-compose.yml`, configuración de `.gitignore`, persistencia con volúmenes y auto-importación. | `feature/GrabielCarnero` |
-| **Joshelyn Ruiz - Franco Benites** | **Integrante 2**: Diseño del Workflow n8n | Construcción del flujo en n8n, modularización en 4 nodos y exportación de archivos JSON progresivos. | `feature/joshelynruiz` `/feature/franco` |
+| **Joshelyn Ruiz - Franco Benites** | **Integrante 2**: Diseño del Workflow n8n | Construcción del flujo en n8n, modularización en 4 nodos y exportación de archivos JSON progresivos. | `feature/joshelynruiz`, `feature/franco` |
 | **Adriel Ynfante** | **Integrante 3**: Pruebas y Documentación | Elaboración del `README.md`, diseño de datos de prueba, registro de incidencias y matriz de errores. | `feature/adriel` |
 
 ---
@@ -127,7 +127,7 @@ Para validar el flujo de extremo a extremo, se diseñaron y enviaron los siguien
 ### 4. Alerta en Canal de Telegram
 > Mensaje con formato Markdown recibido por el bot con todos los detalles del prospecto.
 > 
-> ![Telegram Bot](docs/capturas/04_telegram_alert.jpeg)
+> ![Telegram Bot](docs/capturas/04_telegram_alert.png.jpeg)
 
 ---
 
